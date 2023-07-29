@@ -8,7 +8,7 @@
 
 // deserialize func
 template <typename T>
-func deserialize(const void* bytes , const std::size_t size) -> const T {
+func deserialize(const void* bytes , const std::size_t &size) -> const T {
     static_assert(std::is_trivially_copyable<T>::value, "Data type is not trivially copyable");
 
     T data;
@@ -28,7 +28,8 @@ struct motor_control_msg{
 };
 
 
-inline func set_motor(float power , mbed::PwmOut pwm , mbed::DigitalOut digital){
+inline func set_motor(const float & power, mbed::PwmOut & pwm, mbed::DigitalOut & digital){
+
     auto width = abs((int)(power * (float)1000));
     pwm.pulsewidth_us(width);
     if(power > 0){

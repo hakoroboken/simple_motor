@@ -93,6 +93,8 @@ int main() {
             set_motor(mc_msg.motor_2, V2_PWM,V2_Digital);
             set_motor(mc_msg.motor_3, V3_PWM,V3_Digital);
             set_motor(mc_msg.motor_4, V4_PWM,V4_Digital);
+
+            safeFlag = false;
         }
     }
 }
