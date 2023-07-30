@@ -9,7 +9,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cwchar>
 
+#include "mbed_retarget.h"
 #include "stm32f4xx.h"
 
 #include "net_lib.hpp"
@@ -24,7 +26,7 @@
 #define DIGITAL_PIN_V1 PA_5
 #define DIGITAL_PIN_V2 PA_7
 #define DIGITAL_PIN_V3 PC_8
-#define DIGITAL_PIN_V4 PC_6
+#define DIGITAL_PIN_V4 PC_5
 
 // User settings end
 
@@ -76,7 +78,7 @@ int main() {
     // Serial
     serial_port.set_baud(115200);
     serial_port.set_format(8, BufferedSerial::None, 1);
-    char buf[MAXIMUM_BUFFER_SIZE] = {0};
+    uint8_t buf[MAXIMUM_BUFFER_SIZE] = {0};
 
     // PWM setup
     V1_PWM.period_us(PULSEWIDTH_US);
@@ -84,17 +86,39 @@ int main() {
     V3_PWM.period_us(PULSEWIDTH_US);
     V4_PWM.period_us(PULSEWIDTH_US);
 
+    vector<uint8_t> data;
+
     while (1) {
         if (const ssize_t num = serial_port.read(buf, sizeof(buf))) {
-            if (num < sizeof(motor_control_msg)){continue;}
-            auto mc_msg = deserialize<motor_control_msg>(buf, num);
-            if (mc_msg.id != 0){continue;}
-            set_motor(mc_msg.motor_1, V1_PWM,V1_Digital);
-            set_motor(mc_msg.motor_2, V2_PWM,V2_Digital);
-            set_motor(mc_msg.motor_3, V3_PWM,V3_Digital);
-            set_motor(mc_msg.motor_4, V4_PWM,V4_Digital);
+            for(auto i = 0; i < num ; i++){
+                data.push_back(buf[i]);
+            }
 
-            safeFlag = false;
+            if(data.size() > 128){
+                data.clear();
+            }
+
+            if(std::find(data.begin() , data.end() , 's') == data.end()){data.clear();}
+            if(std::find(data.begin() , data.end() , 't') == data.end()){data.clear();}
+            if(std::find(data.begin() , data.end() , 'e') == data.end()){continue;}
+            if(std::find(data.begin() , data.end() , 'n') == data.end()){continue;}
+
+
+            data.pop_back();
+            data.pop_back();
+            data.erase(data.begin());
+            data.erase(data.begin());
+            
+            auto mc_msg = deserialize<motor_control_msg>(data);
+            set_motor(mc_msg.motor_1, V1_PWM, V1_Digital);
+            set_motor(mc_msg.motor_2, V2_PWM, V2_Digital);
+            set_motor(mc_msg.motor_3, V3_PWM, V3_Digital);
+            set_motor(mc_msg.motor_4, V4_PWM, V4_Digital);
+
+            serial_port.write(data.data(), data.size()); //debug
+
+            data.clear();
+            safeFlag = true;
         }
     }
 }

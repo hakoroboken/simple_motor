@@ -8,14 +8,11 @@
 
 // deserialize func
 template <typename T>
-func deserialize(const void* bytes , const std::size_t &size) -> const T {
+T deserialize(std::vector<uint8_t>& bytes) {
     static_assert(std::is_trivially_copyable<T>::value, "Data type is not trivially copyable");
 
     T data;
-    if (size == sizeof(T)) {
-        std::memcpy(&data, bytes, sizeof(data));
-    }
-    
+    std::memcpy(&data, bytes.data(), sizeof(data));
     return data;
 }
 
