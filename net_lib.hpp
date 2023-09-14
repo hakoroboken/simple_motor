@@ -26,10 +26,19 @@ struct motor_control_msg{
 
 
 inline func set_motor(const float & power, mbed::PwmOut & pwm, mbed::DigitalOut & digital){
+    auto power_ = power;
 
-    auto width = abs((int)(power * (float)1000));
+    if(power > 1.0){
+        power_ = 1.0;
+    }
+
+    if(power < -1.0){
+        power_ = -1.0;
+    }
+
+    auto width = abs((int)(power_ * (float)2000));
     pwm.pulsewidth_us(width);
-    if(power > 0){
+    if(power_ > 0.0){
         digital = 1;
     }else{
         digital = 0;

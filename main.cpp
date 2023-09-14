@@ -30,7 +30,7 @@
 
 // User settings end
 
-#define PULSEWIDTH_US 1000
+#define PULSEWIDTH_US 2000
 #define MAXIMUM_BUFFER_SIZE 128
 
 static BufferedSerial serial_port(USBTX, USBRX);
@@ -64,10 +64,10 @@ func safeCheck(){
         safeCounter = 0;
         safeFlag = false;
 
-        set_motor(0, V1_PWM,V1_Digital);
-        set_motor(0, V2_PWM,V2_Digital);
-        set_motor(0, V3_PWM,V3_Digital);
-        set_motor(0, V4_PWM,V4_Digital);
+        set_motor(0.8, V1_PWM,V1_Digital);
+        set_motor(0.8, V2_PWM,V2_Digital);
+        set_motor(0.8, V3_PWM,V3_Digital);
+        set_motor(0.8, V4_PWM,V4_Digital);
     }
 }
 
@@ -85,7 +85,7 @@ int main() {
     V2_PWM.period_us(PULSEWIDTH_US);
     V3_PWM.period_us(PULSEWIDTH_US);
     V4_PWM.period_us(PULSEWIDTH_US);
-
+    
     vector<uint8_t> data;
 
     while (1) {
@@ -114,8 +114,6 @@ int main() {
             set_motor(mc_msg.motor_2, V2_PWM, V2_Digital);
             set_motor(mc_msg.motor_3, V3_PWM, V3_Digital);
             set_motor(mc_msg.motor_4, V4_PWM, V4_Digital);
-
-            serial_port.write(data.data(), data.size()); //debug
 
             data.clear();
             safeFlag = true;
